@@ -1,1 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2P — Turn Telegram Posts to Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 500: '#6366f1', 600: '#4f46e5' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col justify-between transition-colors duration-300">
 
+    <header class="max-w-4xl w-full mx-auto p-6 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+            <span class="text-2xl">✨</span>
+            <span class="font-bold text-lg tracking-tight">DevChannels</span>
+        </div>
+        <button id="darkModeToggle" class="p-2 rounded-full bg-slate-200 dark:bg-slate-800 text-sm hover:scale-105 transition">
+            🌙
+        </button>
+    </header>
+
+    <main class="max-w-xl w-full mx-auto px-6 text-center my-auto py-12">
+        <div class="inline-block bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-semibold px-3 py-1 rounded-full mb-4">
+            🚀 Zero Setup • Instant Portfolios
+        </div>
+        <h1 class="text-4xl sm:text-5xl font-black tracking-tight mb-4">
+            Your Telegram posts, <br><span class="text-indigo-500">instantly a portfolio.</span>
+        </h1>
+        <p class="text-slate-600 dark:text-slate-400 mb-8 text-sm sm:text-base">
+            Turn your scattered "today I built X" channel updates into a gorgeous developer showcase in one click.
+        </p>
+
+        <form id="portfolioForm" class="bg-white dark:bg-slate-800 p-3 rounded-2xl shadow-xl flex items-center border border-slate-200 dark:border-slate-700">
+            <span class="pl-3 text-slate-400 font-bold">@</span>
+            <input 
+                type="text" 
+                id="channelInput" 
+                placeholder="your_channel_name" 
+                required
+                class="w-full bg-transparent px-2 py-2 text-slate-800 dark:text-slate-100 focus:outline-none placeholder:text-slate-400"
+            >
+            <button 
+                type="submit" 
+                class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-5 py-3 rounded-xl transition duration-200 shrink-0 shadow-md shadow-indigo-500/20"
+            >
+                Generate ⚡
+            </button>
+        </form>
+        <p id="errorMsg" class="text-red-500 text-xs mt-3 hidden"></p>
+    </main>
+
+    <footer class="text-center py-6 text-xs text-slate-400">
+        Built with ❤️ for Telegram Creators & Devs
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
