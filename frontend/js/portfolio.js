@@ -1,83 +1,109 @@
-// Dark mode synchronization on portfolio page
-const darkModeToggle = document.getElementById('darkModeToggle');
-const htmlElement = document.documentElement;
+const API_BASE_URL = "http://127.0.0.1:8000/api/portfolio";
 
-if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    htmlElement.classList.add('dark');
-    darkModeToggle.textContent = '☀️';
-}
+document.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const channelName = urlParams.get("user");
 
-darkModeToggle.addEventListener('click', () => {
-    htmlElement.classList.toggle('dark');
-    if (htmlElement.classList.contains('dark')) {
-        localStorage.setItem('theme', 'dark');
-        darkModeToggle.textContent = '☀️';
-    } else {
-        localStorage.setItem('theme', 'light');
-        darkModeToggle.textContent = '🌙';
+    if (!channelName) {
+        displayError("No channel specified. Please go back and enter a username.");
+        return;
     }
+
+    document.getElementById("channelTitle").textContent = `@${channelName}'s Portfolio`;
+    fetchPortfolioData(channelName);
 });
 
-// Extract query parameter ?user=channelname
-const urlParams = new URLSearchParams(window.location.search);
-const channelName = urlParams.get('user');
-
-const loader = document.getElementById('loader');
-const projectsGrid = document.getElementById('projectsGrid');
-const errorContainer = document.getElementById('errorContainer');
-const channelTitle = document.getElementById('channelTitle');
-const channelHandle = document.getElementById('channelHandle');
-const avatarLetter = document.getElementById('avatarLetter');
-const postCountBadge = document.getElementById('postCountBadge');
-
-if (!channelName) {
-    loader.classList.add('hidden');
-    errorContainer.classList.remove('hidden');
-    document.getElementById('errorDescription').textContent = 'No channel username was provided.';
-} else {
-    fetchPortfolioData(channelName);
-}
-
-async function fetchPortfolioData(username) {
+async function fetchPortfolioData(channelName) {
     try {
-        const response = await fetch(`http://127.0.0.1:8000/api/portfolio/${username}`);
+        const response = await `${API_BASE_URL}/${channelName}`;
+        const res = await fetch(response);
         
-        if (!response.ok) {
-            throw new Error('Channel not found or private');
+        if (!res.ok) {
+            const errData = await res.json();
+            throw new Error(errData.detail || "Failed to fetch channel data.");
         }
 
-        const data = await response.json();
+        const data = await res.json();
         renderPortfolio(data);
     } catch (err) {
-        loader.classList.add('hidden');
-        errorContainer.classList.remove('hidden');
-        document.getElementById('errorDescription').textContent = err.message || 'Failed to connect to the backend server.';
+        displayError(err.message);
     }
 }
 
 function renderPortfolio(data) {
-    loader.classList.add('hidden');
+    document.getElementById("loadingState").classList.add("hidden");
     
-    // Set Header Info
-    channelTitle.textContent = data.channel;
-    channelHandle.textContent = `@${data.channel}`;
-    avatarLetter.textContent = data.channel.charAt(0).toUpperCase();
-    postCountBadge.textContent = `Found ${data.total_posts} project milestones`;
-
     if (data.projects.length === 0) {
-        projectsGrid.innerHTML = `<p class="col-span-2 text-center text-slate-500 py-10">No public project posts found in this channel.</p>`;
-        projectsGrid.classList.remove('hidden');
+        displayError("No matching project updates found in this channel's public feed.");
         return;
     }
 
-    // Render Cards
-    projectsGrid.innerHTML = data.projects.map(project => {
-        // Build tags markup
-        const tagsHtml = project.tags.map(tag => 
-            `<span class="text-xs bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-medium px-2.5 py-1 rounded-lg">#${tag}</span>`
-        ).join('');
+    document.getElementById("postCount").textContent = `${data.total_posts} milestones found`;
+    
+    const gridContainer = document.getElementById("projectsGrid");
+    gridContainer.classList.remove("hidden");
 
-        // Build links markup
-        const linksHtml = project.links.map(link => {
-            let label = 'Demo/Link';
-            if (
+    data.projects.forEach(project => {
+        const card = document.createElement("article");
+        card.className = "bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 shadow-sm hover:border-slate-700 transition-all space-y-4";
+
+        // Image attachment (if any)
+        let imageHtml = "";
+        if (project.image) {
+            imageHtml = `
+                <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-950 max-h-72">
+                    <img src="${project.image}" alt="Project preview" class="w-full h-full object-cover">
+                </div>
+            `;
+        }
+
+        // Tags formatting
+        let tagsHtml = "";
+        if (project.tags && project.tags.length > 0) {
+            tagsHtml = `<div class="flex flex-wrap gap-2 pt-2">`;
+            project.tags.forEach(tag => {
+                tagsHtml += `<span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs px-2.5 py-1 rounded-full font-medium">#${tag}</span>`;
+            });
+            tagsHtml += `</div>`;
+        }
+
+        // Action links (GitHub, live demos extracted from text)
+        let linksHtml = "";
+        if (project.links && project.links.length > 0) {
+            linksHtml = `<div class="flex flex-wrap gap-3 pt-2 border-t border-slate-800/60 mt-4">`;
+            project.links.forEach(link => {
+                // Shorten link label for neatness
+                let domain = new URL(link).hostname.replace('www.', '');
+                linksHtml += `
+                    <a href="${link}" target="_blank" rel="noopener noreferrer" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700/60 flex items-center gap-1.5 transition-all">
+                        ↗ ${domain}
+                    </a>
+                `;
+            });
+            linksHtml += `</div>`;
+        }
+
+        // Format raw text (preserve line breaks)
+        let formattedText = project.text.replace(/\n/g, '<br>');
+
+        card.innerHTML = `
+            ${imageHtml}
+            <div class="text-slate-300 text-sm leading-relaxed space-y-2">
+                <p>${formattedText}</p>
+            </div>
+            ${tagsHtml}
+            ${linksHtml}
+        `;
+
+        gridContainer.appendChild(card);
+    });
+}
+
+function displayError(message) {
+    document.getElementById("loadingState").classList.add("hidden");
+    const errorState = document.getElementById("errorState");
+    const errorText = document.getElementById("errorText");
+    
+    errorText.textContent = message;
+    errorState.classList.remove("hidden");
+}
