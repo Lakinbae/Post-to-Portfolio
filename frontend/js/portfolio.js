@@ -117,3 +117,57 @@ let boostHtml = `
         <span class="text-xs text-slate-600">ID: ${project.project_id}</span>
     </div>
 `;
+async function boostProject(channelName, projectId, btnElement) {
+    try {
+        const response = `http://127.0.0.1:8000/api/boost/${channelName}/${projectId}`;
+        const res = await fetch(response, { method: "POST" });
+        const result = await res.json();
+        
+        if (result.success) {
+            const countSpan = btnElement.querySelector("span");
+            countSpan.textContent = result.new_count;
+            
+            // Brief pop animation effect
+            btnElement.classList.add("scale-105", "border-indigo-500");
+            setTimeout(() => btnElement.classList.remove("scale-105", "border-indigo-500"), 200);
+        }
+    } catch (err) {
+        console.error("Failed to boost project:", err);
+    }
+}
+
+function toggleAIChat() {
+    const modal = document.getElementById("aiChatModal");
+    modal.classList.toggle("hidden");
+    const urlParams = new URLSearchParams(window.location.search);
+    document.getElementById("chatChannelName").textContent = urlParams.get("user");
+}
+
+async function sendAIQuery() {
+    const input = document.getElementById("chatInput");
+    const history = document.getElementById("chatHistory");
+    const question = input.value.trim();
+    const urlParams = new URLSearchParams(window.location.search);
+    const channelName = urlParams.get("user");
+
+    if (!question) return;
+
+    // Append user question
+    history.innerHTML += `<div class="text-right"><span class="inline-block bg-indigo-600/20 text-indigo-300 px-3 py-1.5 rounded-xl">${question}</span></div>`;
+    input.value = "";
+
+    try {
+        const res = await fetch(`http://127.0.0.1:8000/api/chat/${channelName}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question })
+        });
+        const data = await res.json();
+
+        // Append AI response
+        history.innerHTML += `<div><span class="inline-block bg-slate-800 text-slate-200 px-3 py-1.5 rounded-xl border border-slate-700/60">${data.answer}</span></div>`;
+        history.scrollTop = history.scrollHeight;
+    } catch (err) {
+        history.innerHTML += `<div class="text-red-400">Failed to fetch AI response.</div>`;
+    }
+}
