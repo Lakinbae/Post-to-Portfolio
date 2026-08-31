@@ -1,38 +1,25 @@
-// Dark mode initialization
-const darkModeToggle = document.getElementById('darkModeToggle');
-const htmlElement = document.documentElement;
-
-if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    htmlElement.classList.add('dark');
-    darkModeToggle.textContent = '☀️';
-}
-
-darkModeToggle.addEventListener('click', () => {
-    htmlElement.classList.toggle('dark');
-    if (htmlElement.classList.contains('dark')) {
-        localStorage.setItem('theme', 'dark');
-        darkModeToggle.textContent = '☀️';
-    } else {
-        localStorage.setItem('theme', 'light');
-        darkModeToggle.textContent = '🌙';
-    }
-});
-
-// Form submission handler
-const form = document.getElementById('portfolioForm');
-const channelInput = document.getElementById('channelInput');
-const errorMsg = document.getElementById('errorMsg');
-
-form.addEventListener('submit', (e) => {
+document.getElementById('portfolioForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    const username = channelInput.value.trim().replace('@', '');
+    
+    let username = document.getElementById('channelInput').value.trim();
+    
+    // Clean up input if the user accidentally typed '@' or the full URL
+    username = username.replace('@', '');
+    if (username.includes('t.me/')) {
+        username = username.split('t.me/')[1].split('/')[0];
+    }
     
     if (!username) {
-        errorMsg.textContent = 'Please enter a valid channel username.';
-        errorMsg.classList.remove('hidden');
+        showError("Please enter a valid channel username.");
         return;
     }
-
+    
     // Redirect to portfolio view page with query parameter
     window.location.href = `portfolio.html?user=${encodeURIComponent(username)}`;
 });
+
+function showError(message) {
+    const errorEl = document.getElementById('errorMsg');
+    errorEl.textContent = message;
+    errorEl.classList.remove('hidden');
+}
