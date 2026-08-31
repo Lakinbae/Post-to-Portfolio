@@ -34,6 +34,48 @@
             <a href="index.html" class="inline-block bg-slate-900 text-slate-300 hover:text-white text-sm px-4 py-2 rounded-xl border border-slate-800">Try another channel</a>
         </div>
 
+<!-- Stats & Streak Banner -->
+<div id="statsBanner" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center gap-4">
+        <div class="bg-indigo-500/10 p-3 rounded-xl text-indigo-400 font-bold">🔥</div>
+        <div>
+            <p class="text-xs text-slate-500 font-medium">Building Streak</p>
+            <p id="streakCount" class="text-lg font-bold text-slate-200">0 Days</p>
+        </div>
+    </div>
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center gap-4">
+        <div class="bg-emerald-500/10 p-3 rounded-xl text-emerald-400 font-bold">📦</div>
+        <div>
+            <p class="text-xs text-slate-500 font-medium">Total Milestones</p>
+            <p id="milestoneCount" class="text-lg font-bold text-slate-200">0</p>
+        </div>
+    </div>
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+        <div>
+            <p class="text-xs text-slate-500 font-medium">AI Portfolio Assistant</p>
+            <p class="text-sm font-semibold text-indigo-400">Ask anything →</p>
+        </div>
+        <button onclick="toggleAIChat()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-2 rounded-xl transition-all">Chat</button>
+    </div>
+</div>
+
+<!-- AI Chat Drawer (Hidden by default) -->
+<div id="aiChatModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+            <h3 class="font-bold text-slate-200 text-sm">Ask @<span id="chatChannelName"></span>'s Portfolio AI</h3>
+            <button onclick="toggleAIChat()" class="text-slate-500 hover:text-white">✕</button>
+        </div>
+        <div id="chatHistory" class="h-48 overflow-y-auto space-y-3 text-xs text-slate-300 pr-2">
+            <p class="text-slate-500 italic">Ask questions like: "What Python projects has this creator built?"</p>
+        </div>
+        <div class="flex gap-2">
+            <input type="text" id="chatInput" placeholder="Type a question..." class="flex-grow bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+            <button onclick="sendAIQuery()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-4 py-2 rounded-xl">Send</button>
+        </div>
+    </div>
+</div>
+
         <!-- Projects Grid / Timeline -->
         <div id="projectsGrid" class="space-y-6 hidden">
             <!-- Dynamically injected project cards will go here -->
