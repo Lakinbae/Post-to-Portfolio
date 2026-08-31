@@ -107,3 +107,13 @@ function displayError(message) {
     errorText.textContent = message;
     errorState.classList.remove("hidden");
 }
+// Inside your renderPortfolio function loop, add this to each card's innerHTML:
+
+let boostHtml = `
+    <div class="flex items-center justify-between pt-3 border-t border-slate-800/60 mt-4">
+        <button onclick="boostProject('${data.channel}', '${project.project_id}', this)" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-1.5 rounded-lg border border-slate-700/60 flex items-center gap-1.5 transition-all cursor-pointer">
+            🚀 Boost <span class="bg-slate-900 px-2 py-0.5 rounded text-indigo-400 font-bold">${project.boosts}</span>
+        </button>
+        <span class="text-xs text-slate-600">ID: ${project.project_id}</span>
+    </div>
+`;
